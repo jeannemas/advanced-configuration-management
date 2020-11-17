@@ -1,7 +1,7 @@
 {
-  "name": "",
+  "name": "easy-configuration",
   "version": "1.0.0",
-  "description": "",
+  "description": "An easy to manage configuration manager",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "git+https://github.com/paullouismas/easy-configuration.git"
   },
   "author": "Mas Paul-Louis",
   "license": "MIT",
   "bugs": {
-    "url": ""
+    "url": "https://github.com/paullouismas/easy-configuration/issues"
   },
-  "homepage": "",
+  "homepage": "https://github.com/paullouismas/easy-configuration/#readme",
   "devDependencies": {
     "@types/chai": "^4.2.14",
     "@types/mocha": "^8.0.4",
