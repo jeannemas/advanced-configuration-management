@@ -1,10 +1,32 @@
+import { IInnerConfiguration } from './types/InnerConfiguration';
+
 abstract class EasyConfiguration {
   #configuration = new Map<string, unknown>();
 
-  protected constructor(configurationObject: Record<string, unknown>) {
+  #innerConfiguration: IInnerConfiguration = {
+    addPropertiesToConfigAllowed: false,
+
+    allowDifferentTypeOnConfig: false,
+  };
+
+  /**
+   * Create a configuration instance.
+   *
+   * @param configurationObject - The object to consider as default configuration.
+   */
+  protected constructor(
+    configurationObject: Record<string, unknown>,
+    {
+      addPropertiesToConfigAllowed = false,
+      allowDifferentTypeOnConfig = false,
+    }: IInnerConfiguration,
+  ) {
     Object.entries(configurationObject).forEach(([key, value]) =>
       this.#configuration.set(key, value),
     );
+
+    this.#innerConfiguration.addPropertiesToConfigAllowed = addPropertiesToConfigAllowed;
+    this.#innerConfiguration.allowDifferentTypeOnConfig = allowDifferentTypeOnConfig;
   }
 
   // #region setConfig()
@@ -39,18 +61,20 @@ abstract class EasyConfiguration {
     /** The configuration property */
     const key = configurationOrProperty as string;
 
-    // Ensure that the configurationProperty exist in the configuration object
     if (!this.#configuration.has(key)) {
-      throw new ReferenceError(`Configuration property '${key}' does not exist.`);
-    }
+      // Ensure that the configurationProperty exist in the configuration object
+      if (!this.#innerConfiguration.addPropertiesToConfigAllowed) {
+        throw new ReferenceError(`Configuration property '${key}' does not exist.`);
+      }
+    } else {
+      const expectedType = typeof this.#configuration.get(key);
 
-    const expectedType = typeof this.#configuration.get(key);
-
-    // Ensure that the value of the configurationProperty is valid
-    if (typeof value !== expectedType) {
-      throw new TypeError(
-        `Invalid type for configuration property '${key}', expected '${expectedType}'.`,
-      );
+      // Ensure that the value of the configurationProperty is valid
+      if (typeof value !== expectedType && !this.#innerConfiguration.allowDifferentTypeOnConfig) {
+        throw new TypeError(
+          `Invalid type for configuration property '${key}', expected '${expectedType}'.`,
+        );
+      }
     }
 
     // Update the configuration
