@@ -1,8 +1,10 @@
 abstract class EasyConfiguration {
-  #configuration: Record<string, unknown> = {};
+  #configuration = new Map<string, unknown>();
 
   protected constructor(configurationObject: Record<string, unknown>) {
-    this.#configuration = configurationObject;
+    Object.entries(configurationObject).forEach(([key, value]) =>
+      this.#configuration.set(key, value),
+    );
   }
 
   // #region setConfig()
@@ -38,11 +40,11 @@ abstract class EasyConfiguration {
     const key = configurationOrProperty as string;
 
     // Ensure that the configurationProperty exist in the configuration object
-    if (!(key in this.#configuration)) {
+    if (!this.#configuration.has(key)) {
       throw new ReferenceError(`Configuration property '${key}' does not exist.`);
     }
 
-    const expectedType = typeof this.#configuration[key];
+    const expectedType = typeof this.#configuration.get(key);
 
     // Ensure that the value of the configurationProperty is valid
     if (typeof value !== expectedType) {
@@ -52,7 +54,7 @@ abstract class EasyConfiguration {
     }
 
     // Update the configuration
-    this.#configuration[key] = value;
+    this.#configuration.set(key, value);
   }
 
   // #endregion
@@ -77,16 +79,19 @@ abstract class EasyConfiguration {
     // Check if property is 'undefined'
     if (configurationProperty === undefined) {
       // Return the whole configuration
-      return { ...this.#configuration };
+      return Array.from(this.#configuration).reduce<Record<string, unknown>>(
+        (obj, [key, value]) => Object.defineProperty(obj, key, { value }),
+        {},
+      );
     }
 
     // Ensure that the configurationProperty exist in the configuration object
-    if (!(configurationProperty in this.#configuration)) {
+    if (!this.#configuration.has(configurationProperty)) {
       throw new ReferenceError(`Configuration property '${configurationProperty}' does not exist.`);
     }
 
     // Return the configuration property value
-    return this.#configuration[configurationProperty] as R;
+    return this.#configuration.get(configurationProperty) as R;
   }
 
   // #endregion
