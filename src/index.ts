@@ -11,7 +11,7 @@ abstract class EasyConfiguration {
   /**
    * Create a configuration instance.
    *
-   * @param configurationObject - The object to consider as default configuration.
+   * @param configurationObject - The default configuration.
    */
   protected constructor(
     configurationObject: Record<string, IConfigurationEntry>,
@@ -65,6 +65,13 @@ abstract class EasyConfiguration {
       if (!this.#internalConfiguration.addPropertiesToConfigAllowed) {
         throw new ReferenceError(`Configuration property '${key}' does not exist.`);
       }
+
+      // Add the new property to the configuration
+      this.#externalConfiguration.set(key, {
+        types: [typeof value],
+        default: value,
+        value,
+      });
     } else {
       const expectedTypes = this.#externalConfiguration.get(key).types;
 
@@ -76,13 +83,13 @@ abstract class EasyConfiguration {
           )}'.`,
         );
       }
-    }
 
-    // Update the configuration
-    this.#externalConfiguration.set(key, {
-      ...this.#externalConfiguration.get(key),
-      value,
-    });
+      // Update the configuration
+      this.#externalConfiguration.set(key, {
+        ...this.#externalConfiguration.get(key),
+        value,
+      });
+    }
   }
 
   // #endregion
