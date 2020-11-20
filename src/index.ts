@@ -1,9 +1,9 @@
-import { IInnerConfiguration } from './types/InnerConfiguration';
+import { IInternalConfiguration } from './types/InternalConfiguration';
 
 abstract class EasyConfiguration {
-  #configuration = new Map<string, unknown>();
+  #externalConfiguration = new Map<string, unknown>();
 
-  #innerConfiguration: IInnerConfiguration = {
+  #internalConfiguration: IInternalConfiguration = {
     addPropertiesToConfigAllowed: false,
 
     allowDifferentTypeOnConfig: false,
@@ -19,14 +19,14 @@ abstract class EasyConfiguration {
     {
       addPropertiesToConfigAllowed = false,
       allowDifferentTypeOnConfig = false,
-    }: IInnerConfiguration,
+    }: IInternalConfiguration = {},
   ) {
     Object.entries(configurationObject).forEach(([key, value]) =>
-      this.#configuration.set(key, value),
+      this.#externalConfiguration.set(key, value),
     );
 
-    this.#innerConfiguration.addPropertiesToConfigAllowed = addPropertiesToConfigAllowed;
-    this.#innerConfiguration.allowDifferentTypeOnConfig = allowDifferentTypeOnConfig;
+    this.#internalConfiguration.addPropertiesToConfigAllowed = !!addPropertiesToConfigAllowed;
+    this.#internalConfiguration.allowDifferentTypeOnConfig = !!allowDifferentTypeOnConfig;
   }
 
   // #region setConfig()
@@ -61,16 +61,19 @@ abstract class EasyConfiguration {
     /** The configuration property */
     const key = configurationOrProperty as string;
 
-    if (!this.#configuration.has(key)) {
+    if (!this.#externalConfiguration.has(key)) {
       // Ensure that the configurationProperty exist in the configuration object
-      if (!this.#innerConfiguration.addPropertiesToConfigAllowed) {
+      if (!this.#internalConfiguration.addPropertiesToConfigAllowed) {
         throw new ReferenceError(`Configuration property '${key}' does not exist.`);
       }
     } else {
-      const expectedType = typeof this.#configuration.get(key);
+      const expectedType = typeof this.#externalConfiguration.get(key);
 
       // Ensure that the value of the configurationProperty is valid
-      if (typeof value !== expectedType && !this.#innerConfiguration.allowDifferentTypeOnConfig) {
+      if (
+        typeof value !== expectedType &&
+        !this.#internalConfiguration.allowDifferentTypeOnConfig
+      ) {
         throw new TypeError(
           `Invalid type for configuration property '${key}', expected '${expectedType}'.`,
         );
@@ -78,7 +81,7 @@ abstract class EasyConfiguration {
     }
 
     // Update the configuration
-    this.#configuration.set(key, value);
+    this.#externalConfiguration.set(key, value);
   }
 
   // #endregion
@@ -103,19 +106,19 @@ abstract class EasyConfiguration {
     // Check if property is 'undefined'
     if (configurationProperty === undefined) {
       // Return the whole configuration
-      return Array.from(this.#configuration).reduce<Record<string, unknown>>(
+      return Array.from(this.#externalConfiguration).reduce<Record<string, unknown>>(
         (obj, [key, value]) => Object.defineProperty(obj, key, { value }),
         {},
       );
     }
 
     // Ensure that the configurationProperty exist in the configuration object
-    if (!this.#configuration.has(configurationProperty)) {
+    if (!this.#externalConfiguration.has(configurationProperty)) {
       throw new ReferenceError(`Configuration property '${configurationProperty}' does not exist.`);
     }
 
     // Return the configuration property value
-    return this.#configuration.get(configurationProperty) as R;
+    return this.#externalConfiguration.get(configurationProperty) as R;
   }
 
   // #endregion
