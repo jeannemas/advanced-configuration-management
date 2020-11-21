@@ -1,6 +1,15 @@
 import { IInternalConfiguration } from './types/InternalConfiguration';
 import { IConfigurationEntry } from './types/ConfigurationEntry';
 
+/**
+ * An abstract class (meant to be extended) to simplify a configuration management.
+ *
+ * @class
+ *
+ * @abstract
+ *
+ * @author Mas Paul-Louis
+ */
 abstract class EasyConfiguration {
   #externalConfiguration = new Map<string, IConfigurationEntry>();
 
