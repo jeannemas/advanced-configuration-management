@@ -14,14 +14,35 @@ abstract class EasyConfiguration {
    * @param configurationObject - The default configuration.
    */
   protected constructor(
-    configurationObject: Record<string, IConfigurationEntry>,
+    configurationObject: Record<string, IConfigurationEntry | unknown>,
     { addPropertiesToConfigAllowed = false }: IInternalConfiguration = {},
   ) {
     Object.entries(configurationObject).forEach(([key, entry]) => {
+      let value: unknown;
+      let types: Array<string>;
+      let defaultValue: unknown;
+
+      if (typeof entry === 'object' && entry !== null && 'value' in entry) {
+        // An entry has been given
+        const configurationEntry = entry as IConfigurationEntry;
+
+        value = configurationEntry.value;
+        types =
+          'types' in configurationEntry && Array.isArray(configurationEntry.types)
+            ? configurationEntry.types
+            : [typeof value];
+        defaultValue = 'default' in configurationEntry ? configurationEntry.default : value;
+      } else {
+        // A plain value has been given
+        value = entry;
+        types = [typeof value];
+        defaultValue = value;
+      }
+
       this.#externalConfiguration.set(key, {
-        types: 'types' in entry ? entry.types : [typeof entry.value],
-        default: entry['default' in entry ? 'default' : 'value'],
-        value: entry.value,
+        types,
+        default: defaultValue,
+        value,
       });
     });
 
