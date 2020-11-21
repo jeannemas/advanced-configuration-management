@@ -1,5 +1,5 @@
 {
-  "name": "easy-configuration",
+  "name": "advanced-configuration-management",
   "version": "1.0.0",
   "description": "An easy to manage configuration manager",
   "main": "./dist/index.js",
@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/paullouismas/easy-configuration.git"
+    "url": "git+https://github.com/paullouismas/advanced-configuration-management.git"
   },
   "author": "Mas Paul-Louis",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/paullouismas/easy-configuration/issues"
+    "url": "https://github.com/paullouismas/advanced-configuration-management/issues"
   },
-  "homepage": "https://github.com/paullouismas/easy-configuration/#readme",
+  "homepage": "https://github.com/paullouismas/advanced-configuration-management/#readme",
   "devDependencies": {
     "@types/chai": "^4.2.14",
     "@types/mocha": "^8.0.4",
