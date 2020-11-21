@@ -1,3 +1,3 @@
 export interface IInternalConfiguration {
-  addPropertiesToConfigAllowed?: boolean;
+  addPropertiesToConfigurationAllowed?: boolean;
 }

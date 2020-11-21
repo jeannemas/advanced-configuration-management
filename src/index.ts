@@ -14,19 +14,22 @@ abstract class EasyConfiguration {
   #externalConfiguration = new Map<string, IConfigurationEntry>();
 
   #internalConfiguration: IInternalConfiguration = {
-    addPropertiesToConfigAllowed: false,
+    addPropertiesToConfigurationAllowed: false,
   };
 
   /**
    * Create a configuration instance.
    *
-   * @param configurationObject - The default configuration.
+   * @param configuration - The default configuration.
+   * @param internalConfiguration - The optionnal internal configuration.
+   * @param internalConfiguration.addPropertiesToConfigurationAllowed - Whether or not unknown
+   *   properties can later be added.
    */
   protected constructor(
-    configurationObject: Record<string, IConfigurationEntry | unknown>,
-    { addPropertiesToConfigAllowed = false }: IInternalConfiguration = {},
+    configuration: Record<string, IConfigurationEntry | unknown>,
+    { addPropertiesToConfigurationAllowed = false }: IInternalConfiguration = {},
   ) {
-    Object.entries(configurationObject).forEach(([key, entry]) => {
+    Object.entries(configuration).forEach(([property, entry]) => {
       let value: unknown;
       let types: Array<string>;
       let defaultValue: unknown;
@@ -48,75 +51,76 @@ abstract class EasyConfiguration {
         defaultValue = value;
       }
 
-      this.#externalConfiguration.set(key, {
+      // Define the external configuration property
+      this.#externalConfiguration.set(property, {
         types,
         default: defaultValue,
         value,
       });
     });
 
-    this.#internalConfiguration.addPropertiesToConfigAllowed = !!addPropertiesToConfigAllowed;
+    // Update the internal configuration
+    this.#internalConfiguration.addPropertiesToConfigurationAllowed = !!addPropertiesToConfigurationAllowed;
   }
 
   // #region setConfig()
 
   /**
-   * Update the configuration.
+   * Update the external configuration.
    *
-   * @param configuration - An object specifying the properties as keys, and the values.
+   * @param configuration - An object specifying the properties, and the values.
    */
   public setConfig(configuration: Record<string, unknown>): void;
   /**
-   * Update the configuration.
+   * Update the external configuration.
    *
-   * @param configurationProperty - The configuration property to update.
+   * @param property - The configuration property to update.
    * @param value - The new value of the configuration property.
    */
-  public setConfig(configurationProperty: string, value: unknown): void;
+  public setConfig(property: string, value: unknown): void;
   public setConfig(
     configurationOrProperty: Record<string, unknown> | string,
     value?: unknown,
   ): void {
     // If the configuration is an object
     if (typeof configurationOrProperty === 'object') {
-      const config = configurationOrProperty as Record<string, unknown>;
-
-      // Call the setConfig foreach key/value pair
-      Object.entries(config).forEach(([key, val]) => this.setConfig(key, val));
+      // Call the setConfig for each key/value pair
+      Object.entries(configurationOrProperty).forEach(([property, val]) =>
+        this.setConfig(property, val),
+      );
 
       return;
     }
 
-    /** The configuration property */
-    const key = configurationOrProperty as string;
-
-    if (!this.#externalConfiguration.has(key)) {
-      // Ensure that the configurationProperty exist in the configuration object
-      if (!this.#internalConfiguration.addPropertiesToConfigAllowed) {
-        throw new ReferenceError(`Configuration property '${key}' does not exist.`);
+    if (!this.#externalConfiguration.has(configurationOrProperty)) {
+      // Ensure that the property exist in the configuration object
+      if (!this.#internalConfiguration.addPropertiesToConfigurationAllowed) {
+        throw new ReferenceError(
+          `Configuration property '${configurationOrProperty}' does not exist.`,
+        );
       }
 
       // Add the new property to the configuration
-      this.#externalConfiguration.set(key, {
+      this.#externalConfiguration.set(configurationOrProperty, {
         types: [typeof value],
         default: value,
         value,
       });
     } else {
-      const expectedTypes = this.#externalConfiguration.get(key).types;
+      const expectedTypes = this.#externalConfiguration.get(configurationOrProperty).types;
 
       // Ensure that the value of the configurationProperty is valid
       if (!expectedTypes.includes(typeof value)) {
         throw new TypeError(
-          `Invalid type for configuration property '${key}', expected '${expectedTypes.join(
+          `Invalid type for configuration property '${configurationOrProperty}', expected '${expectedTypes.join(
             '|',
           )}'.`,
         );
       }
 
       // Update the configuration
-      this.#externalConfiguration.set(key, {
-        ...this.#externalConfiguration.get(key),
+      this.#externalConfiguration.set(configurationOrProperty, {
+        ...this.#externalConfiguration.get(configurationOrProperty),
         value,
       });
     }
@@ -133,30 +137,30 @@ abstract class EasyConfiguration {
    */
   public getConfig(): Record<string, unknown>;
   /**
-   * Retrieve a configuration properties.
+   * Retrieve a configuration property.
    *
-   * @param configurationProperty - The name of the configuration property.
+   * @param property - The name of the configuration property.
    *
    * @returns Return the value of the configuration property identified by `configurationProperty`.
    */
-  public getConfig<R = unknown>(configurationProperty: string): R;
-  public getConfig<R = unknown>(configurationProperty?: string): Record<string, unknown> | R {
-    // Check if property is 'undefined'
-    if (configurationProperty === undefined) {
+  public getConfig<R = unknown>(property: string): R;
+  public getConfig<R = unknown>(property?: string): Record<string, unknown> | R {
+    if (property === undefined) {
       // Return the whole configuration
       return Array.from(this.#externalConfiguration).reduce<Record<string, unknown>>(
-        (obj, [key, { value }]) => Object.defineProperty(obj, key, { value }),
+        (obj, [configurationProperty, { value }]) =>
+          Object.defineProperty(obj, configurationProperty, { value }),
         {},
       );
     }
 
-    // Ensure that the configurationProperty exist in the configuration object
-    if (!this.#externalConfiguration.has(configurationProperty)) {
-      throw new ReferenceError(`Configuration property '${configurationProperty}' does not exist.`);
+    // Ensure that the configuration property exist in the configuration object
+    if (!this.#externalConfiguration.has(property)) {
+      throw new ReferenceError(`Configuration property '${property}' does not exist.`);
     }
 
     // Return the configuration property value
-    return this.#externalConfiguration.get(configurationProperty).value as R;
+    return this.#externalConfiguration.get(property).value as R;
   }
 
   // #endregion
