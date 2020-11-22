@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { EasyConfiguration } from '../src/';
+import EasyConfiguration from '../src/';
 
 const shouldNotThrow = (func: () => void) => {
   try {
@@ -12,18 +12,13 @@ const shouldNotThrow = (func: () => void) => {
 };
 
 describe('Main tests', () => {
-  it('Set config for unknown property throw ReferenceError when addPropertiesToConfigAllowed=false', () => {
+  it('Set config for unknown property throw ReferenceError', () => {
     // Arrange
     class A extends EasyConfiguration {
       public constructor() {
-        super(
-          {
-            a: false,
-          },
-          {
-            addPropertiesToConfigurationAllowed: false,
-          },
-        );
+        super({
+          a: false,
+        });
       }
     }
 
@@ -32,28 +27,6 @@ describe('Main tests', () => {
 
     // Assert
     expect(() => b.setConfig('foo', true)).to.throw(ReferenceError);
-  });
-
-  it('Set config for unknown property does not throw ReferenceError when addPropertiesToConfigAllowed=true', () => {
-    // Arrange
-    class A extends EasyConfiguration {
-      public constructor() {
-        super(
-          {
-            a: false,
-          },
-          {
-            addPropertiesToConfigurationAllowed: true,
-          },
-        );
-      }
-    }
-
-    // Act
-    const b = new A();
-
-    // Assert
-    expect(() => b.setConfig('foo', true)).to.satisfy(shouldNotThrow);
   });
 
   it('Setting invalid type should throw TypeError', () => {
