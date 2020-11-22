@@ -9,7 +9,7 @@ import { IConfigurationEntry } from './types/ConfigurationEntry';
  *
  * @author Mas Paul-Louis
  */
-abstract class EasyConfiguration {
+abstract class AdvancedConfigurationManagement {
   #configuration = new Map<string, IConfigurationEntry>();
 
   /**
@@ -143,4 +143,4 @@ abstract class EasyConfiguration {
   // #endregion
 }
 
-export default EasyConfiguration;
+export default AdvancedConfigurationManagement;

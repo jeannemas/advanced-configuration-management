@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import EasyConfiguration from '../src/';
+import AdvancedConfigurationManagement from '../src/';
 
 const shouldNotThrow = (func: () => void) => {
   try {
@@ -14,7 +14,7 @@ const shouldNotThrow = (func: () => void) => {
 describe('Main tests', () => {
   it('Set config for unknown property throw ReferenceError', () => {
     // Arrange
-    class A extends EasyConfiguration {
+    class A extends AdvancedConfigurationManagement {
       public constructor() {
         super({
           a: false,
@@ -31,7 +31,7 @@ describe('Main tests', () => {
 
   it('Setting invalid type should throw TypeError', () => {
     // Arrange
-    class A extends EasyConfiguration {
+    class A extends AdvancedConfigurationManagement {
       public constructor() {
         super({
           a: true,
@@ -48,7 +48,7 @@ describe('Main tests', () => {
 
   it('Setting valid type should not throw', () => {
     // Arrange
-    class A extends EasyConfiguration {
+    class A extends AdvancedConfigurationManagement {
       public constructor() {
         super({
           a: { types: ['string', 'boolean'], value: true },
@@ -65,7 +65,7 @@ describe('Main tests', () => {
 
   it('Set valid config should not throw', () => {
     // Arrange
-    class A extends EasyConfiguration {
+    class A extends AdvancedConfigurationManagement {
       public constructor() {
         super({
           a: true,
@@ -82,7 +82,7 @@ describe('Main tests', () => {
 
   it('Set valid config update configuration', () => {
     // Arrange
-    class A extends EasyConfiguration {
+    class A extends AdvancedConfigurationManagement {
       public constructor() {
         super({
           a: true,
@@ -102,7 +102,7 @@ describe('Main tests', () => {
 
   it('Get config with undefined parameter return whole config', function () {
     // Arrange
-    class A extends EasyConfiguration {
+    class A extends AdvancedConfigurationManagement {
       public constructor() {
         super({
           a: true,
@@ -120,7 +120,7 @@ describe('Main tests', () => {
 
   it('Get unknown config property throw ReferenceError', function () {
     // Arrange
-    class A extends EasyConfiguration {
+    class A extends AdvancedConfigurationManagement {
       public constructor() {
         super({
           a: true,
@@ -138,7 +138,7 @@ describe('Main tests', () => {
   it('Get valid config property return value', function () {
     // Arrange
     const defaultValue = true;
-    class A extends EasyConfiguration {
+    class A extends AdvancedConfigurationManagement {
       public constructor() {
         super({
           a: defaultValue,
