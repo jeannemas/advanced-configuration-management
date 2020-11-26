@@ -1,6 +1,6 @@
 {
   "name": "advanced-configuration-management",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "An easy to manage configuration manager",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
