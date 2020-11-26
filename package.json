@@ -4,6 +4,10 @@
   "description": "An easy to manage configuration manager",
   "main": "./dist/index",
   "types": "./dist/index",
+  "files": [
+    "./dist/",
+    "./src/"
+  ],
   "scripts": {
     "prepublish": "npm run build",
     "build": "tsc",
