@@ -10,7 +10,7 @@ import { IConfigurationEntry } from './types/ConfigurationEntry';
  * @author Mas Paul-Louis
  */
 abstract class AdvancedConfigurationManagement {
-  #configuration = new Map<string, IConfigurationEntry>();
+  private configuration = new Map<string, IConfigurationEntry>();
 
   /**
    * Create a configuration instance.
@@ -41,7 +41,7 @@ abstract class AdvancedConfigurationManagement {
       }
 
       // Define the external configuration property
-      this.#configuration.set(property, {
+      this.configuration.set(property, {
         types,
         default: defaultValue,
         value,
@@ -79,13 +79,13 @@ abstract class AdvancedConfigurationManagement {
     }
 
     // Ensure that the property exist in the configuration object
-    if (!this.#configuration.has(configurationOrProperty)) {
+    if (!this.configuration.has(configurationOrProperty)) {
       throw new ReferenceError(
         `Configuration property '${configurationOrProperty}' does not exist.`,
       );
     }
 
-    const expectedTypes = this.#configuration.get(configurationOrProperty).types;
+    const expectedTypes = this.configuration.get(configurationOrProperty).types;
 
     // Ensure that the value of the configuration property is valid
     if (!expectedTypes.includes(typeof value)) {
@@ -97,8 +97,8 @@ abstract class AdvancedConfigurationManagement {
     }
 
     // Update the configuration
-    this.#configuration.set(configurationOrProperty, {
-      ...this.#configuration.get(configurationOrProperty),
+    this.configuration.set(configurationOrProperty, {
+      ...this.configuration.get(configurationOrProperty),
       value,
     });
   }
@@ -124,7 +124,7 @@ abstract class AdvancedConfigurationManagement {
   public getConfig<R = unknown>(property?: string): Record<string, unknown> | R {
     if (property === undefined) {
       // Return the whole configuration
-      return Array.from(this.#configuration).reduce<Record<string, unknown>>(
+      return Array.from(this.configuration).reduce<Record<string, unknown>>(
         (obj, [configurationProperty, { value }]) =>
           Object.defineProperty(obj, configurationProperty, { value }),
         {},
@@ -132,12 +132,12 @@ abstract class AdvancedConfigurationManagement {
     }
 
     // Ensure that the configuration property exist in the configuration object
-    if (!this.#configuration.has(property)) {
+    if (!this.configuration.has(property)) {
       throw new ReferenceError(`Configuration property '${property}' does not exist.`);
     }
 
     // Return the configuration property value
-    return this.#configuration.get(property).value as R;
+    return this.configuration.get(property).value as R;
   }
 
   // #endregion
