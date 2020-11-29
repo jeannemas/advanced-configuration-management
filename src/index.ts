@@ -17,34 +17,15 @@ abstract class AdvancedConfigurationManagement {
    *
    * @param configuration - The default configuration.
    */
-  protected constructor(configuration: Record<string, IConfigurationEntry | unknown>) {
+  protected constructor(configuration: Record<string, IConfigurationEntry>) {
     Object.entries(configuration).forEach(([property, entry]) => {
-      let value: unknown;
-      let types: Array<string>;
-      let defaultValue: unknown;
+      const { types, value, validator } = entry;
 
-      if (typeof entry === 'object' && entry !== null && 'value' in entry) {
-        // An entry has been given
-        const configurationEntry = entry as IConfigurationEntry;
-
-        value = configurationEntry.value;
-        types =
-          'types' in configurationEntry && Array.isArray(configurationEntry.types)
-            ? configurationEntry.types
-            : [typeof value];
-        defaultValue = 'default' in configurationEntry ? configurationEntry.default : value;
-      } else {
-        // A plain value has been given
-        value = entry;
-        types = [typeof value];
-        defaultValue = value;
-      }
-
-      // Define the external configuration property
+      // Define the configuration property
       this.configuration.set(property, {
-        types,
-        default: defaultValue,
+        types: Array.isArray(types) ? types : [typeof value],
         value,
+        validator: typeof validator === 'function' ? validator : () => true,
       });
     });
   }
@@ -85,7 +66,8 @@ abstract class AdvancedConfigurationManagement {
       );
     }
 
-    const expectedTypes = this.configuration.get(configurationOrProperty).types;
+    const currentProperty = this.configuration.get(configurationOrProperty);
+    const expectedTypes = currentProperty.types;
 
     // Ensure that the value of the configuration property is valid
     if (!expectedTypes.includes(typeof value)) {
@@ -96,9 +78,22 @@ abstract class AdvancedConfigurationManagement {
       );
     }
 
+    // Ensure the value pass the validation
+    let validationSuccess: boolean;
+
+    try {
+      validationSuccess = currentProperty.validator(value);
+    } catch (error) {
+      throw new EvalError(`An error occured while trying to validate the value '${value}'.`);
+    }
+
+    if (!validationSuccess) {
+      throw new Error(`Validation failed for the value '${value}'.`);
+    }
+
     // Update the configuration
     this.configuration.set(configurationOrProperty, {
-      ...this.configuration.get(configurationOrProperty),
+      ...currentProperty,
       value,
     });
   }

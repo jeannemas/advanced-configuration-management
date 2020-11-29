@@ -1,10 +1,11 @@
+/** A configuration property */
 export interface IConfigurationEntry {
-  /** The accepted types for the configuration property */
+  /** The accepted types */
   types?: Array<string>;
 
-  /** The default value for the configuration property */
-  default?: unknown;
-
-  /** The current value for the configuration property */
+  /** The current value */
   value: unknown;
+
+  /** A validator function */
+  validator?: (value: unknown) => boolean;
 }
