@@ -1,4 +1,5 @@
 import { IConfigurationEntry } from './types/ConfigurationEntry';
+import { ValidationError } from './ValidationError';
 
 /**
  * An abstract class (meant to be extended) to simplify a configuration management.
@@ -88,7 +89,7 @@ abstract class AdvancedConfigurationManagement {
     }
 
     if (!validationSuccess) {
-      throw new Error(`Validation failed for the value '${value}'.`);
+      throw new ValidationError(`Validation failed for the value '${value}'.`);
     }
 
     // Update the configuration
