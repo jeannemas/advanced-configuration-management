@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import AdvancedConfigurationManagement from '../src/';
+import { ValidationError } from '../src/ValidationError';
 
 const shouldNotThrow = (func: () => void) => {
   try {
@@ -17,7 +18,9 @@ describe('Main tests', () => {
     class A extends AdvancedConfigurationManagement {
       public constructor() {
         super({
-          a: false,
+          a: {
+            value: false,
+          },
         });
       }
     }
@@ -34,7 +37,9 @@ describe('Main tests', () => {
     class A extends AdvancedConfigurationManagement {
       public constructor() {
         super({
-          a: true,
+          a: {
+            value: false,
+          },
         });
       }
     }
@@ -51,7 +56,10 @@ describe('Main tests', () => {
     class A extends AdvancedConfigurationManagement {
       public constructor() {
         super({
-          a: { types: ['string', 'boolean'], value: true },
+          a: {
+            types: ['string', 'boolean'],
+            value: true,
+          },
         });
       }
     }
@@ -68,7 +76,9 @@ describe('Main tests', () => {
     class A extends AdvancedConfigurationManagement {
       public constructor() {
         super({
-          a: true,
+          a: {
+            value: false,
+          },
         });
       }
     }
@@ -77,7 +87,7 @@ describe('Main tests', () => {
     const b = new A();
 
     // Assert
-    expect(() => b.setConfig('a', false)).to.satisfy(shouldNotThrow);
+    expect(() => b.setConfig('a', true)).to.satisfy(shouldNotThrow);
   });
 
   it('Set valid config update configuration', () => {
@@ -85,7 +95,9 @@ describe('Main tests', () => {
     class A extends AdvancedConfigurationManagement {
       public constructor() {
         super({
-          a: true,
+          a: {
+            value: false,
+          },
         });
       }
     }
@@ -93,7 +105,7 @@ describe('Main tests', () => {
     // Act
     const b = new A();
     const originalValue = b.getConfig<boolean>('a');
-    b.setConfig('a', false);
+    b.setConfig('a', true);
     const updatedValue = b.getConfig<boolean>('a');
 
     // Assert
@@ -105,7 +117,9 @@ describe('Main tests', () => {
     class A extends AdvancedConfigurationManagement {
       public constructor() {
         super({
-          a: true,
+          a: {
+            value: true,
+          },
         });
       }
     }
@@ -123,7 +137,9 @@ describe('Main tests', () => {
     class A extends AdvancedConfigurationManagement {
       public constructor() {
         super({
-          a: true,
+          a: {
+            value: true,
+          },
         });
       }
     }
@@ -141,7 +157,9 @@ describe('Main tests', () => {
     class A extends AdvancedConfigurationManagement {
       public constructor() {
         super({
-          a: defaultValue,
+          a: {
+            value: defaultValue,
+          },
         });
       }
     }
@@ -157,5 +175,25 @@ describe('Main tests', () => {
     expect(initialValue).to.be.equal(defaultValue);
     expect(initialValue).to.not.equal(updatedValue);
     expect(updatedValue).to.be.equal(newValue);
+  });
+
+  it('Setting value that does not validate should throw Error', function () {
+    // Arrange
+    class A extends AdvancedConfigurationManagement {
+      public constructor() {
+        super({
+          a: {
+            value: 10,
+            validator: (value: number) => value >= 0,
+          },
+        });
+      }
+    }
+
+    // Act
+    const b = new A();
+
+    // Assert
+    expect(() => b.setConfig('a', -1)).to.throw(ValidationError);
   });
 });
