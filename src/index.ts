@@ -1,7 +1,18 @@
 /* eslint-disable max-classes-per-file */
 import { SetupError } from './SetupError';
-import { IConfigurationEntry } from './ConfigurationEntry';
 import { ValidationError } from './ValidationError';
+
+/** A configuration property */
+export interface IConfigurationEntry {
+  /** The accepted types */
+  types?: Array<string>;
+
+  /** The current value */
+  value: unknown;
+
+  /** A validator function */
+  validator?: (value: unknown) => boolean;
+}
 
 /**
  * An abstract class to simplify a configuration management.
