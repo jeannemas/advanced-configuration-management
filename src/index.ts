@@ -29,7 +29,7 @@ abstract class AdvancedConfigurationManagement {
 
       // Types check
       if (types) {
-        if (!Array.isArray(types) || types.every((type) => typeof type === 'string')) {
+        if (!Array.isArray(types) || !types.every((type) => typeof type === 'string')) {
           throw new SetupError('types', 'if specified, it must be an array of types (strings)');
         }
 
