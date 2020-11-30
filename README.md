@@ -10,8 +10,8 @@ class A extends AdvancedConfigurationManagement {
     super({
       foo: {
         types: ['string'],
-        default: '',
         value: 'bar',
+        validator: (value) => value.length > 0,
       },
     });
   }
@@ -52,8 +52,8 @@ class A extends AdvancedConfigurationManagement {
     super({
       foo: {
         types: ['string'],
-        default: '',
         value: 'bar',
+        validator: (value) => value.length > 0,
       },
     });
   }
@@ -73,28 +73,28 @@ b.setConfig('foo', 'baz');
 
 ## Configuring the properties
 
+| Property    | Optionnal | Description                                                                                                    |
+| :---------- | :-------- | :------------------------------------------------------------------------------------------------------------- |
+| `types`     | `true`    | An array of `string` to enforce types (from `typeof`). <br> Defaults to the type of `value`.                   |
+| `value`     | `false`   | The inital value to assign to the property                                                                     |
+| `validator` | `true`    | A validator function used to validate the value, must returns a boolean. <br> Defaults to validate any values. |
+
 In order to configure the properties, simply call the package class constructor from inside your constructor using `super`:
 
 ```javascript
 class A extends AdvancedConfigurationManagement {
   constructor() {
     super({
-      // Detailled version
       foo: {
         types: ['string'], // Optionnal, if not present, inferred from typeof `value`
-        default: '', // Optionnal, if not present, inferred from value of `value`
         value: 'bar',
+        validator: (value) => value.length > 0, // Optionnal, if not present, always validate the value to `true`
       },
 
-      // Detailed version with multiple types
       spaces: {
         types: ['string', 'number'],
-        default: '',
         value: 2,
       },
-
-      // Short version
-      baz: true,
     });
   }
 }
@@ -102,13 +102,12 @@ class A extends AdvancedConfigurationManagement {
 
 Create a class `A` that has those configuration properties:
 
-- A configuration property named `foo` that can be a `string`, has a value of `'bar'` and a default value of `''` (empty string)
-- A configuration property named `spaces` that can be either a `string` or `number`, has a value of `2`, and a default value of `''` (empty string)
-- A configuration property named `baz` that can be a `boolean`, has a value of `true`, and a default value of `true`
+- A configuration property named `foo` that can be a `string`, has a value of `'bar'` and must not be an empty string
+- A configuration property named `spaces` that can be either a `string` or `number`, has a value of `2`
 
 > **Warning!**
 >
-> Even tho having a configuration property as an object is allowed, it is not recommended since it's impossible to assure that the required properties are actually present.
+> Even tho having a configuration property as an object is allowed, it is not recommended since it's impossible to assure that the required properties are actually present. If you need to have an object, use a validator function alongside it.
 
 ## Accessing the configuration
 
@@ -147,33 +146,26 @@ b.setConfig({
 
 > Updating a configuration property with an invalid type will throw a `TypeError`.
 
+> Updating a configuration property with a value that does not validate will throw a `ValidationError`.
+
 ## Using the configuration with a root class that cannot be extended
 
-If your root class cannot be extended (because it already extend another class for example), you can use an adapter class that will be mounted as a property onto your object:
+If your root class cannot be extended (because it already extend another class for example), you can call the `AdvancedConfigurationManagement.CreateAdapter` with the coonfiguration to mount the configuration onto a property:
 
 ```javascript
 // Import the main class
 import AdvancedConfigurationManagement from 'advanced-configuration-management';
 
-// Create an adapter class
-class ConfigurationAdapter extends AdvancedConfigurationManagement {
-  constructor() {
-    // Specify the configuration entries
-    super({
-      foo: {
-        types: ['string'],
-        default: '',
-        value: 'bar',
-      },
-    });
-  }
-}
-
 // Your own class that cannot be extended
 class MyClass {
   constructor() {
     // Mount the configuration adapter onto a property
-    this.configuration = new ConfigurationAdapter();
+    this.configuration = AdvancedConfigurationManagement.CreateAdapter({
+      foo: {
+        types: ['string'],
+        value: 'bar',
+      },
+    });
   }
 
   // Your class logic here...
