@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import { SetupError } from './SetupError';
-import { IConfigurationEntry } from './types/ConfigurationEntry';
+import { IConfigurationEntry } from './ConfigurationEntry';
 import { ValidationError } from './ValidationError';
 
 /**
