@@ -1,8 +1,10 @@
+/* eslint-disable max-classes-per-file */
+import { SetupError } from './SetupError';
 import { IConfigurationEntry } from './types/ConfigurationEntry';
 import { ValidationError } from './ValidationError';
 
 /**
- * An abstract class (meant to be extended) to simplify a configuration management.
+ * An abstract class to simplify a configuration management.
  *
  * @class
  *
@@ -21,13 +23,41 @@ abstract class AdvancedConfigurationManagement {
   protected constructor(configuration: Record<string, IConfigurationEntry>) {
     Object.entries(configuration).forEach(([property, entry]) => {
       const { types, value, validator } = entry;
+      const config: IConfigurationEntry = {
+        value,
+      };
+
+      // Types check
+      if (types) {
+        if (!Array.isArray(types) || types.every((type) => typeof type === 'string')) {
+          throw new SetupError('types', 'if specified, it must be an array of types (strings)');
+        }
+
+        if (!types.includes(typeof value)) {
+          throw new SetupError('types', `value does not include typeof 'value'`);
+        }
+
+        config.types = types;
+      } else {
+        config.types = [typeof value];
+      }
+
+      // Validator check
+      if (validator) {
+        if (typeof validator !== 'function') {
+          throw new SetupError(
+            'validator',
+            'if specified, it must be a function returning a boolean',
+          );
+        }
+
+        config.validator = validator;
+      } else {
+        config.validator = undefined;
+      }
 
       // Define the configuration property
-      this.configuration.set(property, {
-        types: Array.isArray(types) ? types : [typeof value],
-        value,
-        validator: typeof validator === 'function' ? validator : () => true,
-      });
+      this.configuration.set(property, config);
     });
   }
 
@@ -82,10 +112,14 @@ abstract class AdvancedConfigurationManagement {
     // Ensure the value pass the validation
     let validationSuccess: boolean;
 
-    try {
-      validationSuccess = currentProperty.validator(value);
-    } catch (error) {
-      throw new EvalError(`An error occured while trying to validate the value '${value}'.`);
+    if (currentProperty.validator) {
+      try {
+        validationSuccess = currentProperty.validator(value);
+      } catch (error) {
+        throw new EvalError(`An error occured while trying to validate the value '${value}'.`);
+      }
+    } else {
+      validationSuccess = true;
     }
 
     if (!validationSuccess) {
@@ -134,6 +168,25 @@ abstract class AdvancedConfigurationManagement {
 
     // Return the configuration property value
     return this.configuration.get(property).value as R;
+  }
+
+  // #endregion
+
+  // #region Static CreateAdapter
+
+  /**
+   * Create a configuration adapter.
+   *
+   * @param configuration - The configuration setup.
+   */
+  public static CreateAdapter(
+    configuration: Record<string, IConfigurationEntry>,
+  ): AdvancedConfigurationManagement {
+    return new (class ConfigurationAdapter extends AdvancedConfigurationManagement {
+      public constructor(config: Record<string, IConfigurationEntry>) {
+        super(config);
+      }
+    })(configuration);
   }
 
   // #endregion
